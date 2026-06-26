@@ -147,7 +147,7 @@ contract Marketplace is ReentrancyGuard, Pausable {
 
         usdc.transfer(auctionData.seller, auctionData.highestBid);
         IERC721(_nftContract).transferFrom(address(this), auctionData.highestBidder, _tokenId);
- 
+
         emit Marketplace__AuctionIsFinalized(msg.sender, auctionData.highestBid);
     }
 

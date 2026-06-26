@@ -24,7 +24,7 @@ contract CreateNft is ERC721 {
         sTokenCounter++;
     }
 
-    function tokenURI(uint256 tokenId) public view override returns(string memory){
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
         string memory json = Base64.encode(
             bytes(
                 string(
@@ -42,11 +42,11 @@ contract CreateNft is ERC721 {
         return string(abi.encodePacked("data:application/json;base64,", json));
     }
 
-    function getUserSvg(uint256 tokenId) view public returns(string memory) {
+    function getUserSvg(uint256 tokenId) public view returns (string memory) {
         return sTokenIdToSvg[tokenId];
     }
 
-    function getTokenCounter() view public returns(uint256) {
+    function getTokenCounter() public view returns (uint256) {
         return sTokenCounter;
     }
 }

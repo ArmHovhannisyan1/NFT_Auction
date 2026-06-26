@@ -262,7 +262,7 @@ contract MarketplaceTest is Test {
         mockUsdc.mint(user, bidAmount);
         mockUsdc.approve(address(market), bidAmount);
         market.placeBid(bidAmount, nftContract, tokenId);
-        vm.stopPrank(); 
+        vm.stopPrank();
 
         vm.startPrank(user);
         vm.warp(block.timestamp + 60);

@@ -6,7 +6,7 @@ import {NftFactory} from "../src/NftFactory.sol";
 import {RandomSvgGenerator} from "../src/RandomSvgGenerator.sol";
 
 contract DeployNft is Script {
-    function run() external returns(NftFactory){
+    function run() external returns (NftFactory) {
         vm.startBroadcast();
         NftFactory factory = new NftFactory();
         vm.stopBroadcast();

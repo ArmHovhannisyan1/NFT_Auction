@@ -15,7 +15,7 @@ contract NftFactory {
         return address(nft);
     }
 
-    function getUsersCollection(address user) public view returns(address[] memory){
+    function getUsersCollection(address user) public view returns (address[] memory) {
         return sUserCollection[user];
     }
 }

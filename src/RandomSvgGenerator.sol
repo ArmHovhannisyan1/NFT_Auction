@@ -5,7 +5,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 library RandomSvgGenerator {
     using Strings for uint256;
-    
+
     function generateRawSvg(uint256 tokenId) internal pure returns (string memory) {
         uint256 bgColorIdx = uintRandom(tokenId, "BACKGROUND", getColors().length);
         uint256 shapeColorIdx = uintRandom(tokenId, "SHAPE_COLOR", getColors().length);
