@@ -11,6 +11,7 @@ import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.s
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ERC20Mock} from "../src/mock/MockUSDC.sol";
 import {console} from "forge-std/console.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MarketplaceTest is Test {
     DeployMarketplace deployer;
@@ -77,15 +78,17 @@ contract MarketplaceTest is Test {
         market.listNFT(startingPrice, nftContract, tokenId);
         vm.stopPrank();
 
-        assertEq(market.getIdToAuction(nftContract, tokenId).seller, user);
-        assertEq(market.getIdToAuction(nftContract, tokenId).startingPrice, startingPrice);
-        assertEq(market.getIdToAuction(nftContract, tokenId).nftContract, nftContract);
-        assertEq(market.getIdToAuction(nftContract, tokenId).tokenId, tokenId);
-        assertEq(market.getIdToAuction(nftContract, tokenId).highestBidder, address(0));
-        assertEq(market.getIdToAuction(nftContract, tokenId).highestBid, 0);
-        assertEq(market.getIdToAuction(nftContract, tokenId).startTime, 0);
-        assertEq(market.getIdToAuction(nftContract, tokenId).deadline, 0);
-        assertEq(uint256(market.getIdToAuction(nftContract, tokenId).auctionState), 0);
+        Marketplace.AuctionData memory auctionData = market.getIdToAuction(nftContract, tokenId);
+
+        assertEq(auctionData.seller, user);
+        assertEq(auctionData.startingPrice, startingPrice);
+        assertEq(auctionData.nftContract, nftContract);
+        assertEq(auctionData.tokenId, tokenId);
+        assertEq(auctionData.highestBidder, address(0));
+        assertEq(auctionData.highestBid, 0);
+        assertEq(auctionData.startTime, 0);
+        assertEq(auctionData.deadline, 0);
+        assertEq(uint256(auctionData.auctionState), 0);
     }
 
     function testNFTIsTransferedCorrectly() public {
@@ -121,6 +124,31 @@ contract MarketplaceTest is Test {
         vm.stopPrank();
     }
 
+    function testListingNotRevertWhenUnPaused() public {
+        vm.startPrank(market.getOwner());
+        market.pause();
+        market.unpause();
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        mintAndApprove();
+        market.listNFT(startingPrice, nftContract, tokenId);
+        vm.stopPrank();
+    }
+
+    function testSetUSDCAddress() public {
+        address newAddr = makeAddr("newAddr");
+        market.setUSDCAddress(IERC20(newAddr));
+        assertEq(newAddr, address(market.usdc()));
+    }
+
+    function testOnlyOwnerSetUSDCAddress() public {
+        vm.prank(user);
+        vm.expectRevert(Marketplace.Marketplace__NotTheOwner.selector);
+        market.setUSDCAddress(mockUsdc);
+        assertEq(address(mockUsdc), address(market.usdc()));
+    }
+
     /////// PLACE BID FUNCTION TEST
 
     function testBidIsPlaced() public {
@@ -140,10 +168,12 @@ contract MarketplaceTest is Test {
         market.placeBid(bidAmount, nftContract, tokenId);
         vm.stopPrank();
 
-        assertEq(market.getIdToAuction(nftContract, tokenId).highestBidder, user);
-        assertEq(market.getIdToAuction(nftContract, tokenId).highestBid, bidAmount);
-        assertEq(uint256(market.getIdToAuction(nftContract, tokenId).auctionState), 1);
-        assertEq(market.getIdToAuction(nftContract, tokenId).deadline, timestamp + market.getDuration());
+        Marketplace.AuctionData memory auctionData = market.getIdToAuction(nftContract, tokenId);
+
+        assertEq(auctionData.highestBidder, user);
+        assertEq(auctionData.highestBid, bidAmount);
+        assertEq(uint256(auctionData.auctionState), 1);
+        assertEq(auctionData.deadline, timestamp + market.getDuration());
         assertEq(mockUsdc.balanceOf(user), 0);
         assertEq(mockUsdc.balanceOf(address(market)), bidAmount);
     }
@@ -200,7 +230,6 @@ contract MarketplaceTest is Test {
         mockUsdc.approve(address(market), bidAmount);
         market.placeBid(bidAmount, nftContract, tokenId);
         vm.stopPrank();
-        console.log(block.timestamp);
         vm.warp(block.timestamp + market.getDuration() + 1);
         vm.roll(block.number + 1);
         vm.expectRevert(
@@ -210,10 +239,8 @@ contract MarketplaceTest is Test {
                 market.getIdToAuction(nftContract, tokenId).deadline
             )
         );
-        console.log(block.timestamp);
         vm.prank(user);
         market.placeBid(bidAmount + 1, nftContract, tokenId);
-        console.log(block.timestamp);
     }
 
     function testPlaceBidTwoTimes() public {
@@ -248,6 +275,19 @@ contract MarketplaceTest is Test {
             mockUsdc.balanceOf(user2), mockUsdc.balanceOf(market.getIdToAuction(nftContract, tokenId).highestBidder)
         );
         assertEq(mockUsdc.balanceOf(user), prevBid);
+    }
+
+    function testSellerDoesNotExistWhenPlacingBid() public {
+        vm.startPrank(user);
+        mockUsdc.mint(user, bidAmount);
+        mockUsdc.approve(address(market), bidAmount);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Marketplace.Marketplace__SellerDoesNotExist.selector, market.getIdToAuction(nftContract, tokenId).seller
+            )
+        );
+        market.placeBid(bidAmount, nftContract, tokenId);
+        vm.stopPrank();
     }
 
     /////// FINALIZE AUCTION FUNCTION TEST
@@ -325,10 +365,80 @@ contract MarketplaceTest is Test {
         market.listNFT(startingPrice, nftContract, tokenId);
         vm.stopPrank();
 
-        vm.startPrank(user);
+        vm.prank(user);
         vm.expectRevert(Marketplace.Marketplace__AuctionIsNotActive.selector);
         market.finalizeAuction(nftContract, tokenId);
+    }
+
+    function testSellerDoesNotExistWhenFinalizingAuction() public {
+        vm.prank(user);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Marketplace.Marketplace__SellerDoesNotExist.selector, market.getIdToAuction(nftContract, tokenId).seller
+            )
+        );
+        market.finalizeAuction(nftContract, tokenId);
+    }
+
+    /////// CANCEL LISTING FUNCTION TEST
+
+    function testListingIsCanceled() public {
+        vm.startPrank(seller);
+        mintAndApprove();
+        market.listNFT(startingPrice, nftContract, tokenId);
+
+        assertEq(IERC721(nftContract).ownerOf(tokenId), address(market));
+
+        vm.expectEmit(true, true, false, true);
+        emit Marketplace.Marketplace__ListingIsCanceled(seller, nftContract, tokenId);
+        market.cancelListing(nftContract, tokenId);
         vm.stopPrank();
+
+        Marketplace.AuctionData memory auctionData = market.getIdToAuction(nftContract, tokenId);
+
+        assertEq(auctionData.seller, address(0));
+        assertEq(auctionData.startingPrice, 0);
+        assertEq(auctionData.nftContract, address(0));
+        assertEq(auctionData.tokenId, 0);
+        assertEq(auctionData.highestBidder, address(0));
+        assertEq(auctionData.highestBid, 0);
+        assertEq(auctionData.startTime, 0);
+        assertEq(auctionData.deadline, 0);
+        assertEq(uint256(auctionData.auctionState), 0);
+        assertEq(IERC721(nftContract).ownerOf(tokenId), seller);
+    }
+
+    function testOnlySellerCanCancel() public {
+        vm.startPrank(seller);
+        mintAndApprove();
+        market.listNFT(startingPrice, nftContract, tokenId);
+        vm.stopPrank();
+
+        vm.prank(user);
+        vm.expectRevert(abi.encodeWithSelector(Marketplace.Marketplace__OnlySellerCanCancelListing.selector, user));
+        market.cancelListing(nftContract, tokenId);
+    }
+
+    function testWrongListingState() public {
+        vm.startPrank(seller);
+        mintAndApprove();
+        market.listNFT(startingPrice, nftContract, tokenId);
+        vm.stopPrank();
+
+        vm.startPrank(user);
+        mockUsdc.mint(user, bidAmount);
+        mockUsdc.approve(address(market), bidAmount);
+        market.placeBid(bidAmount, nftContract, tokenId);
+        vm.stopPrank();
+
+        vm.prank(seller);
+        vm.expectRevert(Marketplace.Marketplace__WrongListingState.selector);
+        market.cancelListing(nftContract, tokenId);
+    }
+
+    function testSellerDoesNotExistWhenCancelingListing() public {
+        vm.prank(seller);
+        vm.expectRevert(abi.encodeWithSelector(Marketplace.Marketplace__SellerDoesNotExist.selector, seller));
+        market.cancelListing(nftContract, tokenId);
     }
 }
-
