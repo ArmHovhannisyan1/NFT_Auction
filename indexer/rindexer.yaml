@@ -1,0 +1,29 @@
+name: nftAuction
+project_type: no-code
+config: {}
+timestamps: null
+networks:
+- name: Sepolia
+  chain_id: 11155111
+  rpc: https://ethereum-sepolia-rpc.publicnode.com
+storage:
+  postgres:
+    enabled: true
+native_transfers:
+  enabled: false
+contracts:
+- name: Marketplace
+  details:
+  - network: Sepolia
+    address: 0xf44ED197dFC90f081fC2900271eEF43C61CBa842
+    start_block: 11362450
+    #for testing purposes - start_block < events < end_block, a little history of events to be indexed
+    end_block: 11362600
+  abi: ./abis/Marketplace.abi.json
+  include_events:
+  - name: Marketplace__NFTIsListed
+  - name: Marketplace__BidIsPlaced
+  - name: Marketplace__AuctionIsFinalized
+  - name: Marketplace__ListingIsCanceled
+global:
+  health_port: 8080
