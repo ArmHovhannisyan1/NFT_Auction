@@ -8,8 +8,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DeployMarketplace is Script {
     function run() external returns (Marketplace) {
-        IERC20 mock = new ERC20Mock();
         vm.startBroadcast();
+        IERC20 mock = new ERC20Mock();
         Marketplace marketplace = new Marketplace(mock, msg.sender);
         vm.stopBroadcast();
         return marketplace;

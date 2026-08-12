@@ -10,7 +10,6 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Errors} from "@openzeppelin/contracts/interfaces/draft-IERC6093.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ERC20Mock} from "../src/mock/MockUSDC.sol";
-import {console} from "forge-std/console.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MarketplaceTest is Test {
@@ -48,7 +47,7 @@ contract MarketplaceTest is Test {
         vm.startPrank(user);
         mintAndApprove();
         vm.expectEmit(true, true, true, true);
-        emit Marketplace.Marketplace__NFTIsListed(user, startingPrice, tokenId);
+        emit Marketplace.Marketplace__NFTIsListed(nftContract, tokenId, user, startingPrice);
         market.listNFT(startingPrice, nftContract, tokenId);
         vm.stopPrank();
     }
@@ -163,7 +162,7 @@ contract MarketplaceTest is Test {
         mockUsdc.mint(user, bidAmount);
         mockUsdc.approve(address(market), bidAmount);
         vm.expectEmit(true, false, false, true);
-        emit Marketplace.Marketplace__BidIsPlaced(user, bidAmount);
+        emit Marketplace.Marketplace__BidIsPlaced(nftContract, tokenId, user, bidAmount);
         uint256 timestamp = block.timestamp;
         market.placeBid(bidAmount, nftContract, tokenId);
         vm.stopPrank();
@@ -308,7 +307,9 @@ contract MarketplaceTest is Test {
         vm.warp(block.timestamp + 60);
         vm.roll(block.number + 1);
         vm.expectEmit(true, false, false, true);
-        emit Marketplace.Marketplace__AuctionIsFinalized(user, market.getIdToAuction(nftContract, tokenId).highestBid);
+        emit Marketplace.Marketplace__AuctionIsFinalized(
+            nftContract, tokenId, user, market.getIdToAuction(nftContract, tokenId).highestBid
+        );
         market.finalizeAuction(nftContract, tokenId);
         vm.stopPrank();
 
@@ -390,7 +391,7 @@ contract MarketplaceTest is Test {
         assertEq(IERC721(nftContract).ownerOf(tokenId), address(market));
 
         vm.expectEmit(true, true, false, true);
-        emit Marketplace.Marketplace__ListingIsCanceled(seller, nftContract, tokenId);
+        emit Marketplace.Marketplace__ListingIsCanceled(nftContract, tokenId, seller);
         market.cancelListing(nftContract, tokenId);
         vm.stopPrank();
 

@@ -1,0 +1,596 @@
+export const marketplaceAbi = [
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "usdcMock",
+                "type": "address",
+                "internalType": "contract IERC20"
+            },
+            {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "cancelListing",
+        "inputs": [
+            {
+                "name": "_nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "finalizeAuction",
+        "inputs": [
+            {
+                "name": "_nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "getDuration",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "pure"
+    },
+    {
+        "type": "function",
+        "name": "getIdToAuction",
+        "inputs": [
+            {
+                "name": "_nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "tuple",
+                "internalType": "struct Marketplace.AuctionData",
+                "components": [
+                    {
+                        "name": "nftContract",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "tokenId",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "seller",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "startingPrice",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "highestBidder",
+                        "type": "address",
+                        "internalType": "address"
+                    },
+                    {
+                        "name": "highestBid",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "startTime",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "deadline",
+                        "type": "uint256",
+                        "internalType": "uint256"
+                    },
+                    {
+                        "name": "auctionState",
+                        "type": "uint8",
+                        "internalType": "enum Marketplace.AuctionState"
+                    }
+                ]
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getOwner",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "idToAuction",
+        "inputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "seller",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "startingPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "highestBidder",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "highestBid",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "startTime",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "auctionState",
+                "type": "uint8",
+                "internalType": "enum Marketplace.AuctionState"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "listNFT",
+        "inputs": [
+            {
+                "name": "_startingPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "_nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "pause",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "paused",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "placeBid",
+        "inputs": [
+            {
+                "name": "bidAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "_nftContract",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "setUSDCAddress",
+        "inputs": [
+            {
+                "name": "_usdc",
+                "type": "address",
+                "internalType": "contract IERC20"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "unpause",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "usdc",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract IERC20"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "Marketplace__AuctionIsFinalized",
+        "inputs": [
+            {
+                "name": "nftContract",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "winner",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Marketplace__BidIsPlaced",
+        "inputs": [
+            {
+                "name": "nftContract",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "bidder",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "amount",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Marketplace__ListingIsCanceled",
+        "inputs": [
+            {
+                "name": "nftContract",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "canceler",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Marketplace__NFTIsListed",
+        "inputs": [
+            {
+                "name": "nftContract",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "tokenId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "user",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "price",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Paused",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Unpaused",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "error",
+        "name": "EnforcedPause",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ExpectedPause",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__AlreadyListed",
+        "inputs": [
+            {
+                "name": "seller",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__AuctionAlreadyFinalized",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__AuctionIsNotActive",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__LowBidAmount",
+        "inputs": [
+            {
+                "name": "bidder",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "bid",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__NotTheOwner",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__OnlySellerCanCancelListing",
+        "inputs": [
+            {
+                "name": "seller",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__PriceIsLow",
+        "inputs": [
+            {
+                "name": "price",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__SellerCannotBid",
+        "inputs": [
+            {
+                "name": "seller",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__SellerDoesNotExist",
+        "inputs": [
+            {
+                "name": "seller",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__StillGotTime",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__TimerIsOff",
+        "inputs": [
+            {
+                "name": "timeNow",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "Marketplace__WrongListingState",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ReentrancyGuardReentrantCall",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "SafeERC20FailedOperation",
+        "inputs": [
+            {
+                "name": "token",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    }
+] as const;

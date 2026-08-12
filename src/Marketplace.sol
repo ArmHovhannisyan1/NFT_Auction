@@ -1,12 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.33;
 
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract Marketplace is ReentrancyGuard, Pausable {
+    using SafeERC20 for IERC20;
     enum AuctionState {
         LISTED,
         ACTIVE,
@@ -30,10 +32,18 @@ contract Marketplace is ReentrancyGuard, Pausable {
     IERC20 public usdc;
     mapping(address => mapping(uint256 => AuctionData)) public idToAuction;
 
-    event Marketplace__NFTIsListed(address indexed user, uint256 price, uint256 tId);
-    event Marketplace__BidIsPlaced(address indexed bidder, uint256 amount);
-    event Marketplace__AuctionIsFinalized(address indexed winner, uint256 amount);
-    event Marketplace__ListingIsCanceled(address indexed canceler, address indexed nftContract, uint256 tId);
+    event Marketplace__NFTIsListed(
+        address indexed nftContract, uint256 indexed tokenId, address indexed user, uint256 price
+    );
+    event Marketplace__BidIsPlaced(
+        address indexed nftContract, uint256 indexed tokenId, address indexed bidder, uint256 amount
+    );
+    event Marketplace__AuctionIsFinalized(
+        address indexed nftContract, uint256 indexed tokenId, address indexed winner, uint256 amount
+    );
+    event Marketplace__ListingIsCanceled(
+        address indexed nftContract, uint256 indexed tokenId, address indexed canceler
+    );
 
     error Marketplace__NotTheOwner();
     // listNFT()
@@ -68,7 +78,9 @@ contract Marketplace is ReentrancyGuard, Pausable {
     function listNFT(uint256 _startingPrice, address _nftContract, uint256 _tokenId) external whenNotPaused {
         AuctionData storage auctionData = idToAuction[_nftContract][_tokenId];
 
-        if (auctionData.seller != address(0)) revert Marketplace__AlreadyListed(auctionData.seller);
+        if (auctionData.seller != address(0)) {
+            revert Marketplace__AlreadyListed(auctionData.seller);
+        }
         if (_startingPrice == 0) revert Marketplace__PriceIsLow(_startingPrice);
 
         auctionData.startingPrice = _startingPrice;
@@ -78,21 +90,27 @@ contract Marketplace is ReentrancyGuard, Pausable {
         auctionData.auctionState = AuctionState.LISTED;
 
         IERC721(_nftContract).transferFrom(msg.sender, address(this), _tokenId);
-        emit Marketplace__NFTIsListed(msg.sender, _startingPrice, auctionData.tokenId);
+        emit Marketplace__NFTIsListed(_nftContract, _tokenId, msg.sender, _startingPrice);
     }
 
     function placeBid(uint256 bidAmount, address _nftContract, uint256 _tokenId) external nonReentrant whenNotPaused {
         AuctionData storage auctionData = idToAuction[_nftContract][_tokenId];
 
-        if (auctionData.seller == address(0)) revert Marketplace__SellerDoesNotExist(auctionData.seller);
+        if (auctionData.seller == address(0)) {
+            revert Marketplace__SellerDoesNotExist(auctionData.seller);
+        }
 
-        if (auctionData.auctionState == AuctionState.FINALIZED) revert Marketplace__AuctionAlreadyFinalized();
+        if (auctionData.auctionState == AuctionState.FINALIZED) {
+            revert Marketplace__AuctionAlreadyFinalized();
+        }
 
         if (bidAmount <= auctionData.highestBid || bidAmount <= auctionData.startingPrice) {
             revert Marketplace__LowBidAmount(msg.sender, bidAmount);
         }
 
-        if (auctionData.seller == msg.sender) revert Marketplace__SellerCannotBid(msg.sender);
+        if (auctionData.seller == msg.sender) {
+            revert Marketplace__SellerCannotBid(msg.sender);
+        }
 
         if (auctionData.startTime == 0) {
             auctionData.startTime = block.timestamp;
@@ -128,41 +146,55 @@ contract Marketplace is ReentrancyGuard, Pausable {
         auctionData.highestBidder = msg.sender;
 
         if (prevBidder != address(0)) {
-            usdc.transfer(prevBidder, prevBid);
+            usdc.safeTransfer(prevBidder, prevBid);
         }
 
-        usdc.transferFrom(msg.sender, address(this), bidAmount);
-        emit Marketplace__BidIsPlaced(msg.sender, bidAmount);
+        usdc.safeTransferFrom(msg.sender, address(this), bidAmount);
+        emit Marketplace__BidIsPlaced(_nftContract, _tokenId, msg.sender, bidAmount);
     }
 
     function finalizeAuction(address _nftContract, uint256 _tokenId) external nonReentrant whenNotPaused {
         AuctionData storage auctionData = idToAuction[_nftContract][_tokenId];
 
-        if (auctionData.seller == address(0)) revert Marketplace__SellerDoesNotExist(auctionData.seller);
-        if (auctionData.auctionState == AuctionState.FINALIZED) revert Marketplace__AuctionAlreadyFinalized();
-        if (block.timestamp < auctionData.deadline) revert Marketplace__StillGotTime();
-        if (auctionData.auctionState != AuctionState.ACTIVE) revert Marketplace__AuctionIsNotActive();
+        if (auctionData.seller == address(0)) {
+            revert Marketplace__SellerDoesNotExist(auctionData.seller);
+        }
+        if (auctionData.auctionState == AuctionState.FINALIZED) {
+            revert Marketplace__AuctionAlreadyFinalized();
+        }
+        if (block.timestamp < auctionData.deadline) {
+            revert Marketplace__StillGotTime();
+        }
+        if (auctionData.auctionState != AuctionState.ACTIVE) {
+            revert Marketplace__AuctionIsNotActive();
+        }
 
         auctionData.auctionState = AuctionState.FINALIZED;
 
-        usdc.transfer(auctionData.seller, auctionData.highestBid);
+        usdc.safeTransfer(auctionData.seller, auctionData.highestBid);
         IERC721(_nftContract).transferFrom(address(this), auctionData.highestBidder, _tokenId);
 
-        emit Marketplace__AuctionIsFinalized(msg.sender, auctionData.highestBid);
+        emit Marketplace__AuctionIsFinalized(_nftContract, _tokenId, auctionData.highestBidder, auctionData.highestBid);
     }
 
     function cancelListing(address _nftContract, uint256 _tokenId) external {
         AuctionData storage auctionData = idToAuction[_nftContract][_tokenId];
 
-        if (auctionData.seller == address(0)) revert Marketplace__SellerDoesNotExist(msg.sender);
-        if (auctionData.seller != msg.sender) revert Marketplace__OnlySellerCanCancelListing(msg.sender);
-        if (auctionData.auctionState != AuctionState.LISTED) revert Marketplace__WrongListingState();
+        if (auctionData.seller == address(0)) {
+            revert Marketplace__SellerDoesNotExist(msg.sender);
+        }
+        if (auctionData.seller != msg.sender) {
+            revert Marketplace__OnlySellerCanCancelListing(msg.sender);
+        }
+        if (auctionData.auctionState != AuctionState.LISTED) {
+            revert Marketplace__WrongListingState();
+        }
 
         delete idToAuction[_nftContract][_tokenId];
 
         IERC721(_nftContract).transferFrom(address(this), msg.sender, _tokenId);
 
-        emit Marketplace__ListingIsCanceled(msg.sender, _nftContract, _tokenId);
+        emit Marketplace__ListingIsCanceled(_nftContract, _tokenId, msg.sender);
     }
 
     function pause() external onlyOwner {
