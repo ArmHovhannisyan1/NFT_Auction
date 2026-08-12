@@ -18,10 +18,11 @@ contract CreateNft is ERC721 {
     }
 
     function mintNft() public {
-        _safeMint(msg.sender, sTokenCounter);
-        emit CreateNft__NFTMinted(msg.sender, sTokenCounter);
-        sTokenIdToSvg[sTokenCounter] = RandomSvgGenerator.generateRawSvg(sTokenCounter);
+        uint256 tokenIdToMint = sTokenCounter;
         sTokenCounter++;
+        sTokenIdToSvg[tokenIdToMint] = RandomSvgGenerator.generateRawSvg(tokenIdToMint, address(this));
+        _safeMint(msg.sender, tokenIdToMint);
+        emit CreateNft__NFTMinted(msg.sender, tokenIdToMint);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {

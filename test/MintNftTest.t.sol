@@ -5,8 +5,6 @@ import {Test} from "forge-std/Test.sol";
 import {DeployNft} from "../script/DeployNft.s.sol";
 import {NftFactory} from "../src/NftFactory.sol";
 import {CreateNft} from "../src/CreateNft.sol";
-import {console} from "forge-std/console.sol";
-import {RandomSvgGenerator} from "../src/RandomSvgGenerator.sol";
 
 contract MintNftTest is Test {
     DeployNft deployer;
