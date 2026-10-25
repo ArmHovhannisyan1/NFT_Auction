@@ -1,7 +1,7 @@
 import "server-only";
 
 export type Listing = {
-    nftContract: string;
+    nftContract: `0x${string}`;
     tokenId: string;
     user: string;
     price: string;

@@ -5,7 +5,7 @@ timestamps: null
 networks:
 - name: Sepolia
   chain_id: 11155111
-  rpc: https://ethereum-sepolia-rpc.publicnode.com
+  rpc: https://eth-sepolia.g.alchemy.com/v2/3q9ZoZvrj1C5a9mZnbrrd
 storage:
   postgres:
     enabled: true
@@ -16,9 +16,9 @@ contracts:
   details:
   - network: Sepolia
     address: 0xf44ED197dFC90f081fC2900271eEF43C61CBa842
-    start_block: 11362450
-    #for testing purposes - start_block < events < end_block, a little history of events to be indexed
-    end_block: 11362600
+    start_block: 11844000
+    # for testing purposes - start_block < events < end_block, a little history of events to be indexed
+    end_block: 11844015
   abi: ./abis/Marketplace.abi.json
   include_events:
   - name: Marketplace__NFTIsListed

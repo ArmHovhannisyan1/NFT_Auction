@@ -5,12 +5,21 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { Listing } from "@/utils/fetchListings";
 import styles from "./marketplace.module.css";
+import { useChainId, useReadContract } from "wagmi";
+import { chainToContract } from "@/constants/contractAddresses";
+import { marketplaceAbi } from "@/constants/abis/marketplaceAbi";
 
 type ListingsBrowserProps = {
     listings: Listing[];
     failed?: boolean;
 };
 
+type Auction = {
+  seller: `0x${string}`;
+  auctionState: number;
+  startTime: bigint;
+  deadline: bigint;
+};
 // Format the mock token's six decimal places without losing integer precision.
 function formatPrice(raw: string) {
     const padded = raw.padStart(7, "0");
@@ -19,7 +28,34 @@ function formatPrice(raw: string) {
     return fraction ? `${whole}.${fraction}` : whole;
 }
 
+function useAuction(nftContract: `0x${string}`, tokenId: string) {
+    const chainId = useChainId();
+    const marketplaceAddress = chainToContract[chainId]["marketplace"]
+    return useReadContract({
+        address: marketplaceAddress as `0x${string}`,
+        abi: marketplaceAbi,
+        functionName: "getIdToAuction",
+        args: [nftContract, BigInt(tokenId)]
+    });
+}
+
 function ListingCard({ listing }: { listing: Listing }) {
+    
+    const { data, isLoading, error } = useAuction(listing.nftContract, listing.tokenId)
+    
+    function auctionStatus(auction: Auction | undefined, unixSeconds: bigint){
+        if(!auction) return;
+        if(auction?.seller === "0x0000000000000000000000000000000000000000") return "unavailable" 
+
+        if(auction?.auctionState == 0) return "awaiting-first-bid"
+
+        if(auction?.auctionState == 1 && unixSeconds > auction?.deadline) return "awaiting-finalization"      
+        
+        else if(auction?.auctionState == 2) return "finalized"
+        
+        else return "active"
+    }
+    console.log(data)
     return (
         <article className={styles.card}>
             <div className={styles.preview}>
@@ -45,6 +81,12 @@ function ListingCard({ listing }: { listing: Listing }) {
                             {formatPrice(listing.price)} <span>USDCM</span>
                         </dd>
                     </div>
+                    <div>
+                        <dt>Auction state</dt>
+                        <dd>
+                            {data && auctionStatus(data, BigInt(Math.floor(Date.now() / 1000)))}
+                        </dd>
+                    </div>
                 </dl>
             </div>
         </article>
@@ -62,7 +104,7 @@ export default function ListingsBrowser({ listings, failed = false }: ListingsBr
         .map((listing, index) => ({ listing, recordKey: `${listing.nftContract}:${listing.tokenId}:${index}` }))
         .filter(({ listing }) =>
             [listing.nftContract, listing.tokenId, listing.user].some((value) =>
-                value.toLowerCase().includes(query),
+                value.toString().toLowerCase().includes(query),
             ),
         );
 
