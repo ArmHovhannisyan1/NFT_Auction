@@ -95,6 +95,9 @@
 .recordLabel { border-color: #52525b; background: #18181b; color: #d4d4d8; }
 .tokenNumber { max-width: 100%; overflow-wrap: anywhere; color: #e4e4e7; font-size: 40px; font-weight: 600; line-height: 1.2; }
 .previewCaption { color: #a1a1aa; font-size: 12px; }
+.artwork { aspect-ratio: 1; overflow: hidden; border-bottom: 1px solid #27272a; background: #18181b; }
+.artworkImage { display: block; width: 100%; height: 100%; object-fit: contain; }
+.artworkPlaceholder { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 22px; text-align: center; background: radial-gradient(ellipse at top right, #4338ca30, transparent 70%); }
 .cardBody { padding: 24px; }
 .cardTitle { margin-bottom: 22px; overflow-wrap: anywhere; font-size: 20px; font-weight: 600; }
 .details { display: grid; gap: 20px; }
@@ -103,6 +106,15 @@
 .priceRow { border-top: 1px solid #27272a; padding-top: 18px; }
 .price { overflow-wrap: anywhere; color: #fafafa; font-size: 24px; font-weight: 600; }
 .price span { color: #a1a1aa; font-size: 12px; font-weight: 400; }
+
+.statusBadge { display: inline-flex; border: 1px solid #52525b; border-radius: 999px; padding: 6px 10px; color: #d4d4d8; background: #27272a; font-size: 12px; font-weight: 600; }
+.statusBadge[data-status="active"] { color: #a7f3d0; border-color: #065f46; background: #064e3b55; }
+.statusBadge[data-status="awaiting-first-bid"] { color: #bfdbfe; border-color: #1e40af; background: #1e3a8a55; }
+.statusBadge[data-status="awaiting-finalization"] { color: #fde68a; border-color: #92400e; background: #78350f55; }
+.statusBadge[data-status="finalized"] { color: #ddd6fe; border-color: #5b21b6; background: #4c1d9555; }
+.stateHint { color: #a1a1aa; font-size: 12px; line-height: 1.7; }
+.readError { color: #fda4af; font-size: 12px; line-height: 1.7; }
+.countdown { font-family: ui-monospace, monospace; font-size: 24px; font-variant-numeric: tabular-nums; }
 
 .emptyState { border: 1px dashed #52525b; border-radius: 20px; background: #18181b80; padding: 56px 24px; text-align: center; }
 .emptyState h2 { margin-bottom: 12px; font-size: 22px; font-weight: 600; }

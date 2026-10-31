@@ -52,8 +52,8 @@ export default function MarketplacePage() {
                     Discover NFTs listed by the community. Prices are in mock USDC.
                 </p>
                 <p className={styles.notice}>
-                    These records show when NFTs were listed. An auction may have since
-                    ended or been canceled; current availability is not shown yet.
+                    These are historical listing records. Each card separately reads the
+                    current auction state; a record does not guarantee availability.
                 </p>
             </header>
 
